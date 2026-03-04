@@ -10,7 +10,7 @@
     ]
   },
   "response": {
-    "status": 200,
+    "status": 406,
     "jsonBody": { "status": "Rejected" },
     "headers": { "Content-Type": "application/json" }
   }
