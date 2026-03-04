@@ -1,8 +1,8 @@
 package com.aterrizar.service.checkin.flow;
 
-import com.aterrizar.service.checkin.steps.*;
 import org.springframework.stereotype.Service;
 
+import com.aterrizar.service.checkin.steps.*;
 import com.aterrizar.service.core.framework.flow.FlowExecutor;
 import com.aterrizar.service.core.framework.flow.FlowStrategy;
 import com.aterrizar.service.core.model.ExperimentalStepKey;

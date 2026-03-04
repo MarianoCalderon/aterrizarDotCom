@@ -1,13 +1,14 @@
 package com.aterrizar.http.external.gateway.homeoffice;
 
-import com.aterrizar.service.external.homeoffice.EtaRequest;
-import com.aterrizar.service.external.homeoffice.EtaResponse;
-import com.aterrizar.service.external.homeoffice.HomeOfficeHttpClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+
+import com.aterrizar.service.external.homeoffice.EtaRequest;
+import com.aterrizar.service.external.homeoffice.EtaResponse;
+import com.aterrizar.service.external.homeoffice.HomeOfficeHttpClient;
 
 @Component
 public class HomeOfficeHttpClientImpl implements HomeOfficeHttpClient {
@@ -27,11 +28,8 @@ public class HomeOfficeHttpClientImpl implements HomeOfficeHttpClient {
         String url = baseUrl + "eta-validation";
 
         try {
-            ResponseEntity<EtaResponse> response = restTemplate.postForEntity(
-                    url,
-                    request,
-                    EtaResponse.class
-            );
+            ResponseEntity<EtaResponse> response =
+                    restTemplate.postForEntity(url, request, EtaResponse.class);
             return response.getBody();
 
         } catch (HttpClientErrorException.NotAcceptable e) {
