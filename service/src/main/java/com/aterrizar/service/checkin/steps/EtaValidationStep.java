@@ -74,7 +74,7 @@ public class EtaValidationStep implements Step {
 
         } catch (IllegalStateException e) {
             System.err.println(
-                    "FALLO REAL - Sesion: ["
+                    "FALLO Sesion: ["
                             + context.session().sessionId()
                             + "] - Pasaporte: ["
                             + passportNumber

@@ -9,8 +9,9 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -45,12 +46,16 @@ class EtaValidationStepTest {
 
         when(context.session()).thenReturn(session);
         when(session.userInformation()).thenReturn(userInformation);
-        when(context.countryCode()).thenReturn(CountryCode.GB);
     }
 
-    @Test
-    void shouldThrowExceptionWhenApiReturnsRejected() {
+    @ParameterizedTest(name = "ETA Rejected")
+    @EnumSource(
+            value = CountryCode.class,
+            names = {"GB", "CH", "SE"})
+    void shouldThrowExceptionWhenApiReturnsRejected(CountryCode countryCode) {
+        when(context.countryCode()).thenReturn(countryCode);
         when(userInformation.passportNumber()).thenReturn("MEX9876541");
+
         when(homeOfficeHttpClient.validateEta(any(EtaRequest.class)))
                 .thenReturn(new EtaResponse("Rejected"));
 
@@ -64,10 +69,14 @@ class EtaValidationStepTest {
         assertEquals("ETA validation rejected by Home Office", exception.getMessage());
     }
 
-    @Test
-    void shouldMarkSessionAsPendingWhenApiReturnsPending() {
-
+    @ParameterizedTest(name = "ETA Pending")
+    @EnumSource(
+            value = CountryCode.class,
+            names = {"GB", "CH", "SE"})
+    void shouldMarkSessionAsPendingWhenApiReturnsPending(CountryCode countryCode) {
+        when(context.countryCode()).thenReturn(countryCode);
         when(userInformation.passportNumber()).thenReturn("MEX9876542");
+
         when(homeOfficeHttpClient.validateEta(any(EtaRequest.class)))
                 .thenReturn(new EtaResponse("Pending"));
 
@@ -79,9 +88,14 @@ class EtaValidationStepTest {
         verify(context).withSessionData(any(Consumer.class));
     }
 
-    @Test
-    void shouldNotMarkManualReviewWhenApiReturnsAccepted() {
+    @ParameterizedTest(name = "ETA Accepted")
+    @EnumSource(
+            value = CountryCode.class,
+            names = {"GB", "CH", "SE"})
+    void shouldNotMarkManualReviewWhenApiReturnsAccepted(CountryCode countryCode) {
+        when(context.countryCode()).thenReturn(countryCode);
         when(userInformation.passportNumber()).thenReturn("MEX9876540");
+
         when(homeOfficeHttpClient.validateEta(any(EtaRequest.class)))
                 .thenReturn(new EtaResponse("Accepted"));
 
