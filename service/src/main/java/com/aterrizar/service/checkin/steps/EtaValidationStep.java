@@ -15,7 +15,6 @@ import com.aterrizar.service.external.homeoffice.HomeOfficeHttpClient;
 
 @Service
 public class EtaValidationStep implements Step {
-
     private final List<String> enabledCountries;
     private final HomeOfficeHttpClient homeOfficeHttpClient;
 
@@ -28,17 +27,21 @@ public class EtaValidationStep implements Step {
 
     @Override
     public boolean when(Context context) {
+        var session = context.session();
+        var userInfo = session.userInformation();
+        var sessionData = session.sessionData();
+
         if (context.countryCode() == null) return false;
 
-        String sessionCountry = context.countryCode().name();
+        String currentSessionCountryCode = context.countryCode().name();
 
         boolean isCountryEnabled =
-                enabledCountries.contains(sessionCountry)
-                        || ("GB".equals(sessionCountry) && enabledCountries.contains("UK"));
+                enabledCountries.contains(currentSessionCountryCode)
+                        || ("GB".equals(currentSessionCountryCode) && enabledCountries.contains("UK"));
 
         boolean hasPassport =
-                Optional.ofNullable(context.session().userInformation())
-                        .map(userInfo -> userInfo.passportNumber())
+                Optional.ofNullable(userInfo)
+                        .map(sessionPassportNumber -> sessionPassportNumber.passportNumber())
                         .isPresent();
 
         return isCountryEnabled && hasPassport;
@@ -46,9 +49,14 @@ public class EtaValidationStep implements Step {
 
     @Override
     public StepResult onExecute(Context context) {
+        var session = context.session();
+        var userInfo = session.userInformation();
+        var sessionData = session.sessionData();
+
         System.out.println("--- EJECUTANDO VALIDACION ETA ---");
-        String passportNumber = context.session().userInformation().passportNumber();
+        String passportNumber = userInfo.passportNumber();
         String destinationCode = context.countryCode().name();
+        System.out.println(destinationCode);
 
         if ("GB".equals(destinationCode) && enabledCountries.contains("UK")) {
             destinationCode = "UK";
@@ -75,7 +83,7 @@ public class EtaValidationStep implements Step {
         } catch (IllegalStateException e) {
             System.err.println(
                     "FALLO Sesion: ["
-                            + context.session().sessionId()
+                            + session.sessionId()
                             + "] - Pasaporte: ["
                             + passportNumber
                             + "]");
@@ -83,15 +91,11 @@ public class EtaValidationStep implements Step {
         } catch (Exception e) {
             throw new IllegalStateException(
                     "Fallo técnico en sesión ["
-                            + context.session().sessionId()
+                            + session.sessionId()
                             + "]: "
                             + e.getMessage(),
                     e);
-        } /*catch (IllegalStateException e) {
-              throw e;
-          } catch (Exception e) {
-              throw new IllegalStateException("ETA validation failed or was rejected: " + e.getMessage(), e);
-          }*/
+        }
     }
 
     private Context markManualReview(Context context, boolean isRequired) {
