@@ -5,8 +5,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +44,16 @@ class EtaValidationStepTest {
 
     @BeforeEach
     void setUp() {
-        etaValidationStep = new EtaValidationStep(List.of("UK", "CH", "SE"), homeOfficeHttpClient);
+        String enabledCountriesProp =
+                System.getProperty("feature.homeoffice.eta.enabled-countries", "-1");
+
+        List<String> enabledCountries =
+                Arrays.stream(enabledCountriesProp.split(","))
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .collect(Collectors.toList());
+
+        etaValidationStep = new EtaValidationStep(enabledCountries, homeOfficeHttpClient);
 
         when(context.session()).thenReturn(session);
         when(session.userInformation()).thenReturn(userInformation);
