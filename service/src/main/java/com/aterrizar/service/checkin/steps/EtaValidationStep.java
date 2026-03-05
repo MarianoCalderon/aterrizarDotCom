@@ -37,7 +37,8 @@ public class EtaValidationStep implements Step {
 
         boolean isCountryEnabled =
                 enabledCountries.contains(currentSessionCountryCode)
-                        || ("GB".equals(currentSessionCountryCode) && enabledCountries.contains("UK"));
+                        || ("GB".equals(currentSessionCountryCode)
+                                && enabledCountries.contains("UK"));
 
         boolean hasPassport =
                 Optional.ofNullable(userInfo)
@@ -90,11 +91,7 @@ public class EtaValidationStep implements Step {
             throw e;
         } catch (Exception e) {
             throw new IllegalStateException(
-                    "Fallo técnico en sesión ["
-                            + session.sessionId()
-                            + "]: "
-                            + e.getMessage(),
-                    e);
+                    "Fallo técnico en sesión [" + session.sessionId() + "]: " + e.getMessage(), e);
         }
     }
 
