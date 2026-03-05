@@ -1,0 +1,40 @@
+package com.aterrizar.http.config.feature;
+
+import java.util.List;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+import com.aterrizar.service.checkin.feature.EtaFeature;
+
+import lombok.Data;
+
+@Data
+@Component
+@ConfigurationProperties(prefix = "feature.homeoffice.eta")
+public class EtaConfig implements EtaFeature {
+    private List<String> enabledCountries;
+
+    @Override
+    public boolean isCountryAvailable(String countryCode) {
+        if (countryCode == null || countryCode.trim().isEmpty()) return false;
+        if (enabledCountries != null && enabledCountries.contains(countryCode)) return true;
+        return "GB".equals(countryCode)
+                && enabledCountries != null
+                && enabledCountries.contains("UK");
+    }
+
+    @Override
+    public String normalizeDestinationCode(String countryCode) {
+        if ("GB".equals(countryCode)
+                && enabledCountries != null
+                && enabledCountries.contains("UK")) {
+            return "UK";
+        }
+        return countryCode;
+    }
+
+    public List<String> getEnabledCountries() {
+        return enabledCountries == null ? List.of() : List.copyOf(enabledCountries);
+    }
+}

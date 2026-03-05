@@ -5,10 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +14,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.aterrizar.service.checkin.feature.EtaFeature;
 import com.aterrizar.service.core.framework.flow.StepResult;
 import com.aterrizar.service.core.model.Context;
 import com.aterrizar.service.core.model.session.Session;
@@ -40,20 +38,15 @@ class EtaValidationStepTest {
 
     @Mock private UserInformation userInformation;
 
+    @Mock private EtaFeature etaFeature;
+
     private EtaValidationStep etaValidationStep;
 
     @BeforeEach
     void setUp() {
-        String enabledCountriesProp =
-                System.getProperty("feature.homeoffice.eta.enabled-countries", "-1");
+        etaValidationStep = new EtaValidationStep(etaFeature, homeOfficeHttpClient);
 
-        List<String> enabledCountries =
-                Arrays.stream(enabledCountriesProp.split(","))
-                        .map(String::trim)
-                        .filter(s -> !s.isEmpty())
-                        .collect(Collectors.toList());
-
-        etaValidationStep = new EtaValidationStep(enabledCountries, homeOfficeHttpClient);
+        when(etaFeature.normalizeDestinationCode(any())).thenAnswer(i -> i.getArgument(0));
 
         when(context.session()).thenReturn(session);
         when(session.userInformation()).thenReturn(userInformation);
